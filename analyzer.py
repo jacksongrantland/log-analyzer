@@ -19,7 +19,7 @@ def analyze_log(file_path):
     Returns:
         dict: Summary containing counts and repeated messages
     """
-    levels = {'ERROR': 0, 'WARNING': 0, 'INFO': 0}
+    levels = {'ERROR': 0, 'WARNING': 0, 'INFO': 0, 'DEBUG': 0, 'CRITICAL': 0, 'TRACE': 0, 'FATAL': 0}
     messages = defaultdict(int)
     total_lines = 0
 
@@ -53,6 +53,14 @@ def analyze_log(file_path):
                     if len(parts) > 1:
                         msg = parts[1].strip()
                         messages[msg] += 1
+                elif 'DEBUG' in line_upper:
+                    levels['DEBUG'] += 1
+                elif 'CRITICAL' in line_upper:
+                    levels['CRITICAL'] += 1
+                elif 'TRACE' in line_upper:
+                    levels['TRACE'] += 1
+                elif 'FATAL' in line_upper:
+                    levels['FATAL'] += 1
 
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")
@@ -78,6 +86,10 @@ def print_summary(summary):
     print(f"Errors: {summary['levels']['ERROR']}")
     print(f"Warnings: {summary['levels']['WARNING']}")
     print(f"Info: {summary['levels']['INFO']}")
+    print(f"Debugs: {summary['levels']['DEBUG']}")
+    print(f"Criticals: {summary['levels']['CRITICAL']}")
+    print(f"Traces: {summary['levels']['TRACE']}")
+    print(f"Fatals: {summary['levels']['FATAL']}")
     print()
     print("Top Repeated Issues")
     print("-------------------")
