@@ -5,8 +5,9 @@ A command-line tool to analyze structured and semi-structured log files, providi
 ## Features
 
 - Parses common log formats (structured and semi-structured)
-- Counts occurrences of ERROR, WARNING/WARN, and INFO messages
+- Counts occurrences of ERROR, WARNING/WARN, INFO, DEBUG, CRITICAL, TRACE, and FATAL messages
 - Identifies and ranks repeated error/warning messages
+- Extracts and displays timestamp range (earliest and latest) if present
 - Command-line interface for easy integration into workflows
 - Handles large files efficiently by processing line by line
 
@@ -27,9 +28,15 @@ Output:
 Log Summary
 -----------
 Total lines processed: 20
-Errors: 6
+Errors: 7
 Warnings: 6
-Info: 8
+Info: 7
+Debugs: 0
+Criticals: 0
+Traces: 0
+Fatals: 0
+
+No timestamps found in log.
 
 Top Repeated Issues
 -------------------
@@ -37,6 +44,38 @@ FAILED TO CONNECT TO DATABASE - 4
 HIGH MEMORY USAGE - 4
 INVALID AUTHENTICATION TOKEN - 3
 CACHE NEARING LIMIT - 2
+SERVER STARTED - 1
+```
+
+For logs with timestamps and additional levels:
+
+```bash
+python analyzer.py sample_extended.log
+```
+
+Output:
+```
+Log Summary
+-----------
+Total lines processed: 30
+Errors: 8
+Warnings: 6
+Info: 7
+Debugs: 3
+Criticals: 3
+Traces: 2
+Fatals: 1
+
+Earliest timestamp: 2026-04-01T10:32:15
+Latest timestamp: 2026-04-01T10:34:45
+
+Top Repeated Issues
+-------------------
+FAILED TO CONNECT TO DATABASE - 4
+HIGH MEMORY USAGE - 4
+INVALID AUTHENTICATION TOKEN - 3
+CACHE NEARING LIMIT - 2
+SERVER STARTED - 1
 ```
 
 ## Requirements

@@ -8,6 +8,8 @@ along with identifying repeated issues.
 
 import sys
 from collections import defaultdict
+import datetime
+import re
 
 def analyze_log(file_path):
     """
@@ -21,6 +23,7 @@ def analyze_log(file_path):
     """
     levels = {'ERROR': 0, 'WARNING': 0, 'INFO': 0, 'DEBUG': 0, 'CRITICAL': 0, 'TRACE': 0, 'FATAL': 0}
     messages = defaultdict(int)
+    timestamps = []
     total_lines = 0
 
     try:
@@ -28,6 +31,15 @@ def analyze_log(file_path):
             for line in f:
                 total_lines += 1
                 line_upper = line.upper().strip()
+
+                # Extract timestamp if present
+                timestamp_match = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', line)
+                if timestamp_match:
+                    try:
+                        ts = datetime.datetime.strptime(timestamp_match.group(), '%Y-%m-%d %H:%M:%S')
+                        timestamps.append(ts)
+                    except ValueError:
+                        pass  # Invalid timestamp format, skip
 
                 if 'ERROR' in line_upper:
                     levels['ERROR'] += 1
@@ -72,10 +84,16 @@ def analyze_log(file_path):
     # Get top repeated messages
     top_messages = sorted(messages.items(), key=lambda x: x[1], reverse=True)[:5]
 
+    # Compute timestamp range
+    earliest_timestamp = min(timestamps) if timestamps else None
+    latest_timestamp = max(timestamps) if timestamps else None
+
     return {
         'total_lines': total_lines,
         'levels': levels,
-        'top_messages': top_messages
+        'top_messages': top_messages,
+        'earliest_timestamp': earliest_timestamp.isoformat() if earliest_timestamp else None,
+        'latest_timestamp': latest_timestamp.isoformat() if latest_timestamp else None
     }
 
 def print_summary(summary):
@@ -90,6 +108,12 @@ def print_summary(summary):
     print(f"Criticals: {summary['levels']['CRITICAL']}")
     print(f"Traces: {summary['levels']['TRACE']}")
     print(f"Fatals: {summary['levels']['FATAL']}")
+    print()
+    if summary['earliest_timestamp']:
+        print(f"Earliest timestamp: {summary['earliest_timestamp']}")
+        print(f"Latest timestamp: {summary['latest_timestamp']}")
+    else:
+        print("No timestamps found in log.")
     print()
     print("Top Repeated Issues")
     print("-------------------")
