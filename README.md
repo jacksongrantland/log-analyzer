@@ -6,8 +6,10 @@ A command-line tool to analyze structured and semi-structured log files, providi
 
 - Parses common log formats (structured and semi-structured)
 - Counts occurrences of ERROR, WARNING/WARN, INFO, DEBUG, CRITICAL, TRACE, and FATAL messages
-- Identifies and ranks repeated error/warning messages
 - Extracts and displays timestamp range (earliest and latest) if present
+- Extracts and groups messages by source/module (e.g., AuthService) if present
+- Case-insensitive message normalization for better deduplication
+- Identifies and ranks repeated error/warning messages
 - Command-line interface for easy integration into workflows
 - Handles large files efficiently by processing line by line
 

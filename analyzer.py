@@ -24,6 +24,7 @@ def analyze_log(file_path):
     levels = {'ERROR': 0, 'WARNING': 0, 'INFO': 0, 'DEBUG': 0, 'CRITICAL': 0, 'TRACE': 0, 'FATAL': 0}
     messages = defaultdict(int)
     timestamps = []
+    sources = defaultdict(int)
     total_lines = 0
 
     try:
@@ -47,7 +48,16 @@ def analyze_log(file_path):
                     parts = line_upper.split('ERROR', 1)
                     if len(parts) > 1:
                         msg = parts[1].strip()
-                        messages[msg] += 1
+                        if ':' in msg:
+                            source, actual_msg = msg.split(':', 1)
+                            source = source.strip()
+                            actual_msg = actual_msg.strip()
+                            actual_msg = ' '.join(actual_msg.split())  # normalize whitespace
+                            sources[source] += 1
+                            messages[actual_msg] += 1
+                        else:
+                            msg = ' '.join(msg.split())
+                            messages[msg] += 1
                 elif 'WARNING' in line_upper or 'WARN' in line_upper:
                     levels['WARNING'] += 1
                     # Extract message after WARNING or WARN
@@ -57,22 +67,68 @@ def analyze_log(file_path):
                         parts = line_upper.split('WARN', 1)
                     if len(parts) > 1:
                         msg = parts[1].strip()
-                        messages[msg] += 1
+                        if ':' in msg:
+                            source, actual_msg = msg.split(':', 1)
+                            source = source.strip()
+                            actual_msg = actual_msg.strip()
+                            actual_msg = ' '.join(actual_msg.split())  # normalize whitespace
+                            sources[source] += 1
+                            messages[actual_msg] += 1
+                        else:
+                            msg = ' '.join(msg.split())
+                            messages[msg] += 1
                 elif 'INFO' in line_upper:
                     levels['INFO'] += 1
                     # Extract message after INFO
                     parts = line_upper.split('INFO', 1)
                     if len(parts) > 1:
                         msg = parts[1].strip()
-                        messages[msg] += 1
+                        if ':' in msg:
+                            source, actual_msg = msg.split(':', 1)
+                            source = source.strip()
+                            actual_msg = actual_msg.strip()
+                            actual_msg = ' '.join(actual_msg.split())  # normalize whitespace
+                            sources[source] += 1
+                            messages[actual_msg] += 1
+                        else:
+                            msg = ' '.join(msg.split())
+                            messages[msg] += 1
                 elif 'DEBUG' in line_upper:
                     levels['DEBUG'] += 1
+                    parts = line_upper.split('DEBUG', 1)
+                    if len(parts) > 1:
+                        msg = parts[1].strip()
+                        if ':' in msg:
+                            source, actual_msg = msg.split(':', 1)
+                            source = source.strip()
+                            sources[source] += 1
                 elif 'CRITICAL' in line_upper:
                     levels['CRITICAL'] += 1
+                    parts = line_upper.split('CRITICAL', 1)
+                    if len(parts) > 1:
+                        msg = parts[1].strip()
+                        if ':' in msg:
+                            source, actual_msg = msg.split(':', 1)
+                            source = source.strip()
+                            sources[source] += 1
                 elif 'TRACE' in line_upper:
                     levels['TRACE'] += 1
+                    parts = line_upper.split('TRACE', 1)
+                    if len(parts) > 1:
+                        msg = parts[1].strip()
+                        if ':' in msg:
+                            source, actual_msg = msg.split(':', 1)
+                            source = source.strip()
+                            sources[source] += 1
                 elif 'FATAL' in line_upper:
                     levels['FATAL'] += 1
+                    parts = line_upper.split('FATAL', 1)
+                    if len(parts) > 1:
+                        msg = parts[1].strip()
+                        if ':' in msg:
+                            source, actual_msg = msg.split(':', 1)
+                            source = source.strip()
+                            sources[source] += 1
 
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")
@@ -93,7 +149,8 @@ def analyze_log(file_path):
         'levels': levels,
         'top_messages': top_messages,
         'earliest_timestamp': earliest_timestamp.isoformat() if earliest_timestamp else None,
-        'latest_timestamp': latest_timestamp.isoformat() if latest_timestamp else None
+        'latest_timestamp': latest_timestamp.isoformat() if latest_timestamp else None,
+        'top_sources': sorted(sources.items(), key=lambda x: x[1], reverse=True)[:5]
     }
 
 def print_summary(summary):
@@ -122,6 +179,14 @@ def print_summary(summary):
             print(f"{msg} - {count}")
     else:
         print("No repeated issues found.")
+    print()
+    print("Top Sources")
+    print("-----------")
+    if summary['top_sources']:
+        for source, count in summary['top_sources']:
+            print(f"{source} - {count}")
+    else:
+        print("No sources found.")
 
 def main():
     if len(sys.argv) != 2:
